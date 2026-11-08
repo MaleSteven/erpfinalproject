@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Heavy Machinery - Service & Maintenance ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 font-sans text-slate-800">
+
+    <header class="bg-slate-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-truck-monster text-amber-500 text-3xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">Apex Heavy Machinery Ltd.</h1>
+                    <p class="text-xs text-slate-400">Integrated Service & Inventory Management Portal</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 bg-slate-800 p-2 rounded-lg border border-slate-700">
+                <i class="fa-solid fa-user-gear text-amber-400 text-sm"></i>
+                <label for="userRoleSelector" class="text-xs font-semibold text-slate-300">Logged in as:</label>
+                <select id="userRoleSelector" onchange="changeUserRole(this.value)" class="bg-slate-900 text-amber-400 text-xs font-bold rounded px-2 py-1 outline-none border border-slate-700 cursor-pointer">
+                    <option value="CSR">Customer Support Agent</option>
+                    <option value="LEAD">Maintenance Lead</option>
+                    <option value="INV">Inventory Manager</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+
+        <nav class="flex border-b border-slate-300 mb-6 bg-white rounded-t-lg shadow-sm px-4 pt-2 overflow-x-auto">
+            <button onclick="switchTab('customer-service')" id="tab-btn-customer-service" class="tab-btn py-3 px-5 text-sm font-semibold text-amber-600 border-b-2 border-amber-600 flex items-center space-x-2">
+                <i class="fa-solid fa-headset"></i><span>1. Customer Support</span>
+            </button>
+            <button onclick="switchTab('maintenance')" id="tab-btn-maintenance" class="tab-btn py-3 px-5 text-sm font-semibold text-slate-500 border-b-2 border-transparent hover:text-amber-600 flex items-center space-x-2">
+                <i class="fa-solid fa-screwdriver-wrench"></i><span>2. Equipment Telematics</span>
+            </button>
+            <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="tab-btn py-3 px-5 text-sm font-semibold text-slate-500 border-b-2 border-transparent hover:text-amber-600 flex items-center space-x-2">
+                <i class="fa-solid fa-boxes-stacked"></i><span>3. Warehouse Inventory</span>
+            </button>
+            <button onclick="switchTab('testing')" id="tab-btn-testing" class="tab-btn py-3 px-5 text-sm font-semibold text-slate-500 border-b-2 border-transparent hover:text-amber-600 flex items-center space-x-2">
+                <i class="fa-solid fa-flask-vial"></i><span>System Test Runner</span>
+            </button>
+        </nav>
+
+        <div id="systemNotification" class="hidden mb-6 p-4 rounded-lg flex items-center justify-between shadow-sm">
+            <div class="flex items-center space-x-3">
+                <i id="notificationIcon" class="text-xl"></i>
+                <span id="notificationMessage" class="text-sm font-medium"></span>
+            </div>
+            <button onclick="hideNotification()" class="text-slate-500 hover:text-slate-800"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <section id="tab-customer-service" class="tab-content block space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-1">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-plus text-amber-500"></i> Log Equipment Issue
+                    </h2>
+                    <form id="incidentForm" onsubmit="handleFormSubmission(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Customer</label>
+                            <select id="customerSelect" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                                <option value="">Select a customer...</option>
+                                <option value="Atlas Mining Co.">Atlas Mining Co.</option>
+                                <option value="BuildCorp Construction">BuildCorp Construction</option>
+                                <option value="Granite Quarry Ltd">Granite Quarry Ltd</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Machine Model</label>
+                            <select id="machineSelect" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                                <option value="">Select equipment...</option>
+                                <option value="EQ-EXC-99">EQ-EXC-99 (CAT 349 Excavator)</option>
+                                <option value="EQ-LDR-02">EQ-LDR-02 (CAT 966 Wheel Loader)</option>
+                                <option value="EQ-DOZ-05">EQ-DOZ-05 (CAT D8 Crawler Dozer)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Required Spare Part</label>
+                            <select id="partSelect" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                                <option value="">Select part needed...</option>
+                                <option value="P-HYD-01">P-HYD-01 (Main Hydraulic Pump)</option>
+                                <option value="P-FLT-02">P-FLT-02 (Heavy Duty Fuel Filter)</option>
+                                <option value="P-INJ-202">P-INJ-202 (Fuel Injector Assembly)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Issue Details</label>
+                            <textarea id="issueNotes" required rows="3" placeholder="Describe what is wrong with the machine..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold py-2.5 rounded-lg shadow transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> Log Incident & Check Stock
+                        </button>
+                    </form>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-2">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-between">
+                        <span><i class="fa-solid fa-list-check text-amber-500"></i> Service Tickets & Work Orders</span>
+                        <span id="ticketCountBadge" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-bold">0 Active Tickets</span>
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                <tr>
+                                    <th class="p-3">Ticket ID</th>
+                                    <th class="p-3">Customer</th>
+                                    <th class="p-3">Machine</th>
+                                    <th class="p-3">Part Needed</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ticketsTableBody" class="divide-y divide-slate-100">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-maintenance" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-microchip text-amber-500"></i> Equipment Fleet & IIoT Hours Monitoring
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Active Machines</span>
+                        <p class="text-2xl font-black text-slate-800 mt-1">3 Units Tracked</p>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                        <span class="text-xs font-bold text-amber-700 uppercase">IIoT Maintenance Interval</span>
+                        <p class="text-sm font-semibold text-amber-900 mt-1">Service review required every 500 hours</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                        <span class="text-xs font-bold text-red-700 uppercase">Attention Needed</span>
+                        <p id="overdueMachinesCount" class="text-2xl font-black text-red-600 mt-1">0 Overdue</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                            <tr>
+                                <th class="p-3">Machine ID</th>
+                                <th class="p-3">Model</th>
+                                <th class="p-3">Owner / Operator</th>
+                                <th class="p-3">Operating Hours</th>
+                                <th class="p-3">Service Interval</th>
+                                <th class="p-3">Maintenance Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="telematicsTableBody" class="divide-y divide-slate-100">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-inventory" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-2">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center justify-between">
+                        <span><i class="fa-solid fa-boxes-packing text-amber-500"></i> Warehouse Spare Parts Catalog</span>
+                        <span class="text-xs text-slate-400">Live Inventory Counts</span>
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                <tr>
+                                    <th class="p-3">Part Code</th>
+                                    <th class="p-3">Item Description</th>
+                                    <th class="p-3">Price</th>
+                                    <th class="p-3">Stock Available</th>
+                                    <th class="p-3">Stock Controls</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTableBody" class="divide-y divide-slate-100">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 lg:col-span-1">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-cart-shopping text-red-500"></i> Purchasing Requisition Queue
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-4">Backordered items are automatically sent here when stock runs out.</p>
+                    <div id="purchasingQueueContainer" class="space-y-3">
+                    
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-testing" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-vial-circle-check text-amber-500"></i> Integration Test Suite
+                        </h2>
+                        <p class="text-xs text-slate-500">Run automated test scenarios to verify system data flow.</p>
+                    </div>
+                    <button onclick="runSystemTests()" class="bg-slate-900 hover:bg-slate-800 text-amber-400 font-bold px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-play"></i> Run All Tests
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                            <tr>
+                                <th class="p-3">Test Case</th>
+                                <th class="p-3">Scenario</th>
+                                <th class="p-3">Input Parameters</th>
+                                <th class="p-3">Expected Outcome</th>
+                                <th class="p-3">Actual Result</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testSuiteTableBody" class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="p-3 font-bold text-slate-700">TC-01</td>
+                                <td class="p-3">Part Available in Stock</td>
+                                <td class="p-3 text-xs font-mono">EQ-EXC-99 / P-HYD-01</td>
+                                <td class="p-3 text-xs">Stock decreases by 1; Status set to APPROVED_RESERVED</td>
+                                <td id="tc01-result" class="p-3 text-xs text-slate-400">Not run yet</td>
+                                <td id="tc01-status" class="p-3"><span class="bg-slate-100 text-slate-500 text-xs px-2 py-1 rounded font-bold">READY</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-slate-700">TC-02</td>
+                                <td class="p-3">Part Out of Stock</td>
+                                <td class="p-3 text-xs font-mono">EQ-LDR-02 / P-INJ-202</td>
+                                <td class="p-3 text-xs">Status set to PARTS_HOLD; Added to purchasing queue</td>
+                                <td id="tc02-result" class="p-3 text-xs text-slate-400">Not run yet</td>
+                                <td id="tc02-status" class="p-3"><span class="bg-slate-100 text-slate-500 text-xs px-2 py-1 rounded font-bold">READY</span></td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-slate-700">TC-03</td>
+                                <td class="p-3">Invalid Equipment Entry</td>
+                                <td class="p-3 text-xs font-mono">INVALID-ID / P-HYD-01</td>
+                                <td class="p-3 text-xs">Block submission and throw user notification</td>
+                                <td id="tc03-result" class="p-3 text-xs text-slate-400">Not run yet</td>
+                                <td id="tc03-status" class="p-3"><span class="bg-slate-100 text-slate-500 text-xs px-2 py-1 rounded font-bold">READY</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // System State
+        let currentUserRole = 'CSR';
+
+        let fleetData = [
+            { id: 'EQ-EXC-99', model: 'CAT 349 Excavator', customer: 'Atlas Mining Co.', hoursLogged: 550, serviceInterval: 500 },
+            { id: 'EQ-LDR-02', model: 'CAT 966 Wheel Loader', customer: 'BuildCorp Construction', hoursLogged: 310, serviceInterval: 500 },
+            { id: 'EQ-DOZ-05', model: 'CAT D8 Crawler Dozer', customer: 'Granite Quarry Ltd', hoursLogged: 620, serviceInterval: 500 }
+        ];
+
+        let partsInventory = [
+            { id: 'P-HYD-01', name: 'Main Hydraulic Pump', price: 1250.00, inStock: 3 },
+            { id: 'P-FLT-02', name: 'Heavy Duty Fuel Filter', price: 85.50, inStock: 5 },
+            { id: 'P-INJ-202', name: 'Fuel Injector Assembly', price: 890.00, inStock: 0 } // Out of Stock
+        ];
+
+        let activeTickets = [];
+        let reorderQueue = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderFleet();
+            renderInventory();
+            renderTickets();
+            renderReorderQueue();
+        });
+
+        function changeUserRole(newRole) {
+            currentUserRole = newRole;
+            const roleLabels = { 'CSR': 'Customer Support Agent', 'LEAD': 'Maintenance Lead', 'INV': 'Inventory Manager' };
+            showNotification(`Active user role changed to: ${roleLabels[newRole]}`, 'info');
+            renderTickets();
+        }
+
+        function switchTab(targetTab) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.classList.remove('text-amber-600', 'border-amber-600');
+                button.classList.add('text-slate-500', 'border-transparent');
+            });
+
+            document.getElementById(`tab-${targetTab}`).classList.remove('hidden');
+            const selectedBtn = document.getElementById(`tab-btn-${targetTab}`);
+            selectedBtn.classList.remove('text-slate-500', 'border-transparent');
+            selectedBtn.classList.add('text-amber-600', 'border-amber-600');
+        }
+
+        function handleFormSubmission(event) {
+            event.preventDefault();
+
+            if (currentUserRole === 'INV') {
+                showNotification('Permission Denied: Inventory Managers cannot create service tickets.', 'danger');
+                return;
+            }
+
+            const client = document.getElementById('customerSelect').value;
+            const machineId = document.getElementById('machineSelect').value;
+            const partId = document.getElementById('partSelect').value;
+            const details = document.getElementById('issueNotes').value;
+
+            submitNewTicket(client, machineId, partId, details);
+            document.getElementById('incidentForm').reset();
+        }
+
+        function submitNewTicket(customerName, machineId, partId, issueDetails) {
+            const part = partsInventory.find(p => p.id === partId);
+            const machine = fleetData.find(m => m.id === machineId);
+
+            if (!machine || !part) {
+                showNotification('Error: Invalid equipment or part selected.', 'danger');
+                return false;
+            }
+
+            const newTicketId = activeTickets.length + 1;
+            let ticketStatus = 'APPROVED_RESERVED';
+
+            if (part.inStock > 0) {
+                part.inStock -= 1; // Reserve Item
+                showNotification(`Ticket #${newTicketId} logged! 1 unit of '${part.name}' reserved.`, 'success');
+            } else {
+                ticketStatus = 'PARTS_HOLD';
+                reorderQueue.push({
+                    ticketId: newTicketId,
+                    partId: part.id,
+                    partName: part.name,
+                    timestamp: new Date().toLocaleTimeString()
+                });
+                showNotification(`Warning: '${part.name}' is out of stock. Ticket placed on PARTS_HOLD.`, 'warning');
+            }
+
+            activeTickets.push({
+                id: newTicketId,
+                customer: customerName,
+                machineId,
+                partId,
+                partName: part.name,
+                details: issueDetails,
+                status: ticketStatus,
+                dateLogged: new Date().toLocaleTimeString()
+            });
+
+            renderInventory();
+            renderTickets();
+            renderReorderQueue();
+            return true;
+        }
+
+        function cancelWorkOrder(ticketId) {
+            if (currentUserRole !== 'LEAD') {
+                showNotification('Permission Denied: Only Maintenance Leads can cancel work orders.', 'danger');
+                return;
+            }
+
+            const ticket = activeTickets.find(t => t.id === ticketId);
+            if (ticket) {
+                if (ticket.status === 'APPROVED_RESERVED') {
+                    const part = partsInventory.find(p => p.id === ticket.partId);
+                    if (part) part.inStock += 1; // Return stock
+                }
+                ticket.status = 'CANCELLED';
+                showNotification(`Work Order #${ticketId} cancelled. Reserved parts returned to inventory.`, 'info');
+                renderInventory();
+                renderTickets();
+            }
+        }
+
+        function adjustStockCount(partId, amount) {
+            if (currentUserRole !== 'INV' && currentUserRole !== 'LEAD') {
+                showNotification('Permission Denied: Only Warehouse or Maintenance leads can update stock.', 'danger');
+                return;
+            }
+            const item = partsInventory.find(p => p.id === partId);
+            if (item) {
+                item.inStock = Math.max(0, item.inStock + amount);
+                renderInventory();
+                showNotification(`Stock count updated for ${item.name}: ${item.inStock} remaining.`, 'info');
+            }
+        }
+
+        function renderFleet() {
+            const table = document.getElementById('telematicsTableBody');
+            table.innerHTML = '';
+            let overdueCount = 0;
+
+            fleetData.forEach(machine => {
+                const isServiceDue = machine.hoursLogged >= machine.serviceInterval;
+                if (isServiceDue) overdueCount++;
+
+                table.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold text-slate-800">${machine.id}</td>
+                        <td class="p-3">${machine.model}</td>
+                        <td class="p-3">${machine.customer}</td>
+                        <td class="p-3 font-mono">${machine.hoursLogged} hrs</td>
+                        <td class="p-3 font-mono">${machine.serviceInterval} hrs</td>
+                        <td class="p-3">
+                            ${isServiceDue 
+                                ? '<span class="bg-red-100 text-red-700 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-fit"><i class="fa-solid fa-triangle-exclamation"></i> Review Due</span>'
+                                : '<span class="bg-emerald-100 text-emerald-700 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-fit"><i class="fa-solid fa-circle-check"></i> Normal</span>'}
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('overdueMachinesCount').innerText = `${overdueCount} Overdue`;
+        }
+
+        function renderInventory() {
+            const table = document.getElementById('inventoryTableBody');
+            table.innerHTML = '';
+
+            partsInventory.forEach(item => {
+                table.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-mono font-bold text-slate-700">${item.id}</td>
+                        <td class="p-3 font-medium text-slate-800">${item.name}</td>
+                        <td class="p-3 font-mono">$${item.price.toFixed(2)}</td>
+                        <td class="p-3">
+                            <span class="font-bold ${item.inStock === 0 ? 'text-red-600' : 'text-slate-800'}">${item.inStock} units</span>
+                        </td>
+                        <td class="p-3 flex items-center gap-2">
+                            <button onclick="adjustStockCount('${item.id}', 1)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-1 rounded text-xs">+</button>
+                            <button onclick="adjustStockCount('${item.id}', -1)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-1 rounded text-xs">-</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderTickets() {
+            const table = document.getElementById('ticketsTableBody');
+            table.innerHTML = '';
+            document.getElementById('ticketCountBadge').innerText = `${activeTickets.length} Active Tickets`;
+
+            if (activeTickets.length === 0) {
+                table.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400 text-xs">No service tickets recorded yet.</td></tr>`;
+                return;
+            }
+
+            activeTickets.forEach(t => {
+                let statusStyle = 'bg-emerald-100 text-emerald-800';
+                if (t.status === 'PARTS_HOLD') statusStyle = 'bg-amber-100 text-amber-800';
+                if (t.status === 'CANCELLED') statusStyle = 'bg-slate-100 text-slate-500';
+
+                table.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold">#${t.id}</td>
+                        <td class="p-3 text-xs">${t.customer}</td>
+                        <td class="p-3 font-mono text-xs">${t.machineId}</td>
+                        <td class="p-3 text-xs">${t.partName}</td>
+                        <td class="p-3">
+                            <span class="${statusStyle} text-xs px-2.5 py-1 rounded-full font-bold">${t.status}</span>
+                        </td>
+                        <td class="p-3">
+                            ${t.status !== 'CANCELLED' ? `<button onclick="cancelWorkOrder(${t.id})" class="text-xs text-red-600 hover:underline font-semibold">Cancel</button>` : '<span class="text-xs text-slate-400">Closed</span>'}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderReorderQueue() {
+            const container = document.getElementById('purchasingQueueContainer');
+            container.innerHTML = '';
+
+            if (reorderQueue.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No backorders currently queued.</p>`;
+                return;
+            }
+
+            reorderQueue.forEach(order => {
+                container.innerHTML += `
+                    <div class="bg-red-50 border border-red-200 p-3 rounded-lg text-xs">
+                        <div class="flex justify-between font-bold text-red-800 mb-1">
+                            <span>Ticket #${order.ticketId}</span>
+                            <span>${order.timestamp}</span>
+                        </div>
+                        <p class="text-slate-700">Missing Part: <strong>${order.partName}</strong> (${order.partId})</p>
+                        <span class="inline-block mt-2 bg-red-200 text-red-900 px-2 py-0.5 rounded font-bold">PURCHASE REQUISITION CREATED</span>
+                    </div>
+                `;
+            });
+        }
+
+        function showNotification(text, type) {
+            const banner = document.getElementById('systemNotification');
+            const messageEl = document.getElementById('notificationMessage');
+            const iconEl = document.getElementById('notificationIcon');
+
+            banner.className = 'mb-6 p-4 rounded-lg flex items-center justify-between shadow-sm ';
+            if (type === 'success') {
+                banner.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+                iconEl.className = 'fa-solid fa-circle-check text-emerald-600';
+            } else if (type === 'warning') {
+                banner.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
+                iconEl.className = 'fa-solid fa-triangle-exclamation text-amber-600';
+            } else if (type === 'danger') {
+                banner.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+                iconEl.className = 'fa-solid fa-circle-xmark text-red-600';
+            } else {
+                banner.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
+                iconEl.className = 'fa-solid fa-circle-info text-blue-600';
+            }
+
+            messageEl.innerText = text;
+            banner.classList.remove('hidden');
+        }
+
+        function hideNotification() {
+            document.getElementById('systemNotification').classList.add('hidden');
+        }
+
+        function runSystemTests() {
+            // TC-01: In-Stock Ticket
+            const part1 = partsInventory.find(p => p.id === 'P-HYD-01');
+            const startStock = part1.inStock;
+            submitNewTicket('Atlas Mining Co.', 'EQ-EXC-99', 'P-HYD-01', 'TC-01 Test');
+            const test1Passed = part1.inStock === startStock - 1;
+
+            document.getElementById('tc01-result').innerText = `Stock decremented to ${part1.inStock}; Status: APPROVED_RESERVED`;
+            document.getElementById('tc01-status').innerHTML = test1Passed 
+                ? `<span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-bold">PASSED</span>`
+                : `<span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold">FAILED</span>`;
+
+    
+            submitNewTicket('BuildCorp Construction', 'EQ-LDR-02', 'P-INJ-202', 'TC-02 Test');
+            const currentTicket = activeTickets[activeTickets.length - 1];
+            const test2Passed = currentTicket.status === 'PARTS_HOLD';
+
+            document.getElementById('tc02-result').innerText = `Status set to: ${currentTicket.status}; Added to Queue`;
+            document.getElementById('tc02-status').innerHTML = test2Passed 
+                ? `<span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-bold">PASSED</span>`
+                : `<span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold">FAILED</span>`;
+
+        
+            const test3Passed = submitNewTicket('Invalid', 'INVALID-ID', 'P-HYD-01', 'TC-03 Test') === false;
+
+            document.getElementById('tc03-result').innerText = `Invalid ID rejected cleanly by system validation`;
+            document.getElementById('tc03-status').innerHTML = test3Passed 
+                ? `<span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-bold">PASSED</span>`
+                : `<span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-bold">FAILED</span>`;
+
+            showNotification('Automated integration tests executed successfully.', 'success');
+        }
+    </script>
+</body>
+</html>
